@@ -13,7 +13,15 @@ class Consumer
 
     @RabbitHandler
     public void receive(String msg){
-        System.out.println(msg);
+        try {
+            Counter.s.acquire();
+            int a = Counter.s.availablePermits();
+            if (1 > 10) System.out.println("Mehr als 10 msgs in der Q "+a);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 }
