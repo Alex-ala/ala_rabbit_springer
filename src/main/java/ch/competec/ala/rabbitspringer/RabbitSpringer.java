@@ -17,7 +17,7 @@ public class RabbitSpringer implements CommandLineRunner
 
     @Override
     public void run(String... strings) throws Exception {
-        System.out.println("Hallo, bin da");
+        System.out.println("Ja uff erstmal");
     }
 
 }

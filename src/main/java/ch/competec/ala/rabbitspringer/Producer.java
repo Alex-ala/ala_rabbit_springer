@@ -4,7 +4,6 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor;
 
 public class Producer {
     int count = 0;
@@ -18,14 +17,24 @@ public class Producer {
 
     @Scheduled(fixedDelay = 1, initialDelay = 1000)
     public void send() {
-        if (count < 100000){
+        if (count <= 50000){
             count++;
-            this.template.convertAndSend(queue.getName(),"SHITTYBANGBANG");
-            Counter.s.release();
+            try {
+                this.template.convertAndSend(queue.getName(), "SHITTYBANGBANG");
+                Counter.write.release();
+            }catch(Exception e){
+                System.out.println("FUCK ES MACHTE BOOM");
+                count--;
+            }
             if (count%1000 == 0) System.out.println(count);
-        }else if (count == 100000){
-            System.out.println("done");
+        }else if (count > 50000){
+            System.out.println("done sending");
             count++;
+            if (Counter.write.availablePermits() == 50001 && Counter.read.availablePermits() == 50001){
+                System.exit(0);
+            }else{
+                System.out.println(Counter.write.availablePermits()+"writes and "+Counter.read.availablePermits()+" reads");
+            }
         }
 
 
